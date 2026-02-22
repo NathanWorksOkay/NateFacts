@@ -1,0 +1,48 @@
+<!-- index.html -->
+<!doctype html>
+<html lang="en">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width,initial-scale=1" />
+    <title>Home</title>
+    <style>
+        body{font-family:system-ui,-apple-system,Segoe UI,Roboto,Helvetica,Arial;display:flex;min-height:100vh;align-items:center;justify-content:center;margin:0;background:#f5f7fb}
+        .container{width:100%;max-width:900px;padding:24px;text-align:center}
+        h1{margin:0 0 18px;font-size:clamp(20px,3vw,32px)}
+        .options{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
+        .card{background:#fff;border-radius:8px;padding:20px 24px;min-width:200px;box-shadow:0 6px 18px rgba(20,30,50,0.08);text-decoration:none;color:inherit;transition:transform .15s,box-shadow .15s}
+        .card:hover{transform:translateY(-6px);box-shadow:0 12px 28px rgba(20,30,50,0.12)}
+        .card h2{margin:0 0 8px;font-size:18px}
+        .card p{margin:0;color:#444;font-size:14px}
+        footer{margin-top:22px;color:#666;font-size:13px}
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Welcome — Choose an option</h1>
+        <div class="options" role="list">
+            <a class="card" role="listitem" href="page1.html" style="background-color: rgb(196, 75, 59); border: 2px solid rgb(24, 10, 8); color: white;">
+                <h2>Math Facts</h2>
+                <p >Facts About Math!</p>
+            </a>
+            <a class="card" role="listitem" href="page2.html" style="background-color: rgb(95, 182, 124); border: 2px solid rgb(23, 90, 57); color: white;">
+                <h2>Science Facts</h2>
+                <p>Facts About Science!</p>
+            </a>
+  <a class="card" role="listitem" href="page3.html" style="background-color: rgb(211, 144, 45); border: 2px solid rgb(53, 29, 10); color: white;">
+                <h2>Animal Facts</h2>
+                <p>Facts About Animals!</p>
+            </a>
+            <a class="card" role="listitem" href="page4.html" style="background-color: rgb(230, 215, 89); border: 2px solid rgb(24, 10, 8); color: white;">
+                <h2>History Facts</h2>
+                <p>Facts About History!</p>
+            </a>
+        <a class="card" role="listitem" href="page5.html" style="background-color: rgb(100, 149, 237); border: 2px solid rgb(24, 10, 8); color: white;">
+                <h2>Geography Facts</h2>
+                <p>Facts About Geography!</p>
+            </a>
+        </div>
+        <footer>Made By Nate <a href="index.html">Home</a></footer>
+    </div>
+</body>
+</html>
