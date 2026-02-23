@@ -51,16 +51,16 @@
         async function loadJson() {
             // Try modern import with JSON assertion first
             try {
-                const mod = await import('/FactFiles/MathFacts.json', { assert: { type: 'json' } });
+                const mod = await import('./FactFiles/MathFacts.json', { assert: { type: 'json' } });
                 return mod.default;
             } catch (e) {
                 // Fallback to fetch if import assertions aren't supported
                 try {
-                    const res = await fetch('/FactFiles/MathFacts.json', { cache: 'no-store' });
+                    const res = await fetch('./FactFiles/MathFacts.json', { cache: 'no-store' });
                     if (!res.ok) throw new Error('Failed to fetch JSON');
                     return await res.json();
                 } catch (err) {
-                    console.warn('Could not load /FactFiles/MathFacts.json', e, err);
+                    console.warn('Could not load ./FactFiles/MathFacts.json', e, err);
                     return [];
                 }
             }
