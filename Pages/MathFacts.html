@@ -48,29 +48,24 @@
 
     <script type="module">
     (async () => {
-        async function loadJson() {
-            // Try modern import with JSON assertion first
+        // Load ./FactFiles/MathFacts.json using import assertion or fetch as a fallback.
+        async function loadFactFile() {
             try {
-                const mod = await import('./FactFiles/MathFacts.json', { assert: { type: 'json' } });
+                const mod = await import("./FactFiles/MathFacts.json", { assert: { type: "json" } });
                 return mod.default;
             } catch (e) {
-                // Fallback to fetch if import assertions aren't supported
                 try {
                     const res = await fetch('./FactFiles/MathFacts.json', { cache: 'no-store' });
-                    if (!res.ok) throw new Error('Failed to fetch JSON');
+                    if (!res.ok) throw new Error('Failed to fetch ./FactFiles/MathFacts.json');
                     return await res.json();
                 } catch (err) {
                     console.warn('Could not load ./FactFiles/MathFacts.json', e, err);
-                    return [];
+                    return null;
                 }
             }
         }
 
-        // Expose as global used by the wheel script
-        window.jsonData = await loadJson();
-    })();
-    // Add Wheel asset
-    (function(){
+        // Add Wheel asset
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const spinBtn = document.getElementById('spinBtn');
@@ -81,6 +76,7 @@
         const resText = document.getElementById('resText');
 
         let entities = [];
+        let factData = null; // stores MathFacts.json content if loaded
         let currentRotation = 0;
         let isSpinning = false;
 
@@ -124,7 +120,12 @@
         }
 
         function sampleEntities() {
-            entities = jsonData;
+            // If the MathFacts.json (factData) is available use a shuffled copy, else fallback.
+            if (Array.isArray(factData) && factData.length > 0) {
+                entities = factData.slice().sort(() => Math.random() - 0.5);
+            } else {
+                entities = Array.from({ length: 8 }, (_, i) => ({ title: 'Item ' + (i + 1), text: '' }));
+            }
             drawWheel();
             setResult('Sample list loaded', 'Using a generated sample list with ' + entities.length + ' items.');
         }
@@ -249,8 +250,20 @@
             fileInput.value = '';
         });
 
-        // Try to fetch default entities.json, else show test
+        // Initialization: load ./FactFiles/MathFacts.json first, then fallback to entities.json, then sample.
         (async function init(){
+            const data = await loadFactFile();
+            if (Array.isArray(data) && data.length > 0) {
+                factData = data;
+                entities = factData.slice();
+                drawWheel();
+                setResult('Ready', 'Loaded ./FactFiles/MathFacts.json (' + entities.length + ' items).');
+                // also expose for debugging
+                window.jsonData = factData;
+                return;
+            }
+
+            // if MathFacts didn't load, try entities.json (test file)
             const ok = await tryFetchDefault();
             if (!ok) sampleEntities();
         })();
