@@ -46,9 +46,30 @@
         <div class="info">Expected JSON format: an array of objects [{"title":"...","text":"..."}, ...]</div>
     </div>
 
-    <script>
-        import jsonData from './FactFiles/MathFacts.json' with { type: 'json' };
-    // GitHub Copilot
+    <script type="module">
+    (async () => {
+        async function loadJson() {
+            // Try modern import with JSON assertion first
+            try {
+                const mod = await import('/FactFiles/MathFacts.json', { assert: { type: 'json' } });
+                return mod.default;
+            } catch (e) {
+                // Fallback to fetch if import assertions aren't supported
+                try {
+                    const res = await fetch('/FactFiles/MathFacts.json', { cache: 'no-store' });
+                    if (!res.ok) throw new Error('Failed to fetch JSON');
+                    return await res.json();
+                } catch (err) {
+                    console.warn('Could not load /FactFiles/MathFacts.json', e, err);
+                    return [];
+                }
+            }
+        }
+
+        // Expose as global used by the wheel script
+        window.jsonData = await loadJson();
+    })();
+    // Add Wheel asset
     (function(){
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
@@ -135,12 +156,12 @@
                 ctx.lineWidth = 1.5;
                 ctx.stroke();
 
-                // label
+                // label wheel
                 const mid = (start+end)/2;
                 ctx.save();
                 ctx.rotate(mid);
                 ctx.translate(r * 0.6, 0);
-                ctx.rotate(Math.PI/2); // keep text upright
+                ctx.rotate(Math.PI/2); // keep text from flipping
                 ctx.fillStyle = '#111';
                 ctx.font = 'bold 14px system-ui,Segoe UI,Roboto';
                 ctx.textAlign = 'center';
@@ -162,7 +183,7 @@
         }
 
         function wrapText(ctx, text, maxWidth, yOffset, lineHeight){
-            // simple single-line or wrapped label
+            // morph the label
             const words = text.split(' ');
             let line = '';
             let y = yOffset;
@@ -190,21 +211,21 @@
             const n = entities.length;
             const sliceDeg = 360 / n;
             const targetIndex = Math.floor(Math.random() * n);
-            const spins = 6 + Math.floor(Math.random()*3); // 6-8 full turns
+            const spins = 6 + Math.floor(Math.random()*3); // 6-8 spinnys
             const center = (targetIndex * sliceDeg) + sliceDeg/2;
             let offset = (270 - center) % 360;
             if (offset < 0) offset += 360;
             const finalDeg = spins*360 + offset;
 
-            // animate via CSS transform on canvas element
+            // animate via CSS
             canvas.style.transition = 'transform 4.2s cubic-bezier(.12,.9,.22,1)';
             canvas.style.transform = `rotate(${currentRotation + finalDeg}deg)`;
 
-            // after transition, normalize rotation and show result
+            // after transition, set final position
             function onEnd() {
                 canvas.removeEventListener('transitionend', onEnd);
                 currentRotation = (currentRotation + finalDeg) % 360;
-                // reset style to avoid growth of transform values
+                // reset style
                 canvas.style.transition = '';
                 canvas.style.transform = `rotate(${currentRotation}deg)`;
                 isSpinning = false;
@@ -218,7 +239,7 @@
             canvas.addEventListener('transitionend', onEnd);
         }
 
-        // UI wiring
+        // UI access
         spinBtn.addEventListener('click', spin);
         randomizeBtn.addEventListener('click', sampleEntities);
         loadBtn.addEventListener('click', ()=>fileInput.click());
@@ -228,18 +249,17 @@
             fileInput.value = '';
         });
 
-        // Try to fetch default entities.json, otherwise show sample.
+        // Try to fetch default entities.json, else show test
         (async function init(){
             const ok = await tryFetchDefault();
             if (!ok) sampleEntities();
         })();
 
-        // make canvas high-DPI responsive if window resized (optional)
+        // Window resize handling
         window.addEventListener('resize', () => {
-            // no-op for this simple demo; canvas uses fixed SIZE
         });
 
-        // Expose for debugging (optional)
+        // Debugging
         window._wheel = { drawWheel, spin, getEntities: ()=>entities };
     })();
     </script>
