@@ -1,10 +1,10 @@
 [
-                { "title": "1", "text": "Fact 1" },
-                { "title": "2", "text": "Fact 2" },
-                { "title": "3", "text": "Fact 3" },
-                { "title": "4", "text": "Fact 4" },
-                { "title": "5", "text": "Fact 5" },
-                { "title": "6", "text": "Fact 6" },
-                { "title": "7", "text": "Fact 7" },
-                { "title": "8", "text": "Fact 8" }
+                { "title": "Fact #1", "text": "Arabic numerals (0-9) originated in India between the 1st and 6th centuries AD. Europe only adopted them in the 10th century!" },
+                { "title": "Fact #2", "text": "Fact 2" },
+                { "title": "Fact #3", "text": "Fact 3" },
+                { "title": "Fact #4", "text": "Fact 4" },
+                { "title": "Fact #5", "text": "Fact 5" },
+                { "title": "Fact #6", "text": "Fact 6" },
+                { "title": "Fact #7", "text": "Fact 7" },
+                { "title": "Fact #8", "text": "Fact 8" }
             ]
