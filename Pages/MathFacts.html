@@ -10,13 +10,13 @@
         .wrap{min-height:100%;display:flex;flex-direction:column;align-items:center;justify-content:center;padding:24px;gap:18px}
         .wheel-container{position:relative;width:var(--size);height:var(--size);display:flex;align-items:center;justify-content:center}
         canvas#wheel{width:100%;height:100%;border-radius:50%;box-shadow:0 6px 18px rgba(0,0,0,0.12);transform-origin:center center;will-change:transform}
-        .pointer{position:absolute;top:6px;left:50%;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:22px solid var(--accent);filter:drop-shadow(0 2px 4px rgba(0,0,0,0.18))}
+        .pointer{position:absolute;top:6px;left:50%;z-index:2; pointer-events:none;transform:translateX(-50%);width:0;height:0;border-left:14px solid transparent;border-right:14px solid transparent;border-bottom:22px solid var(--accent);filter:drop-shadow(0 2px 4px rgba(0,0,0,0.18))}
         .controls{display:flex;gap:12px;align-items:center}
         button{background:#0066ff;color:white;border:0;padding:10px 14px;border-radius:8px;font-weight:600;cursor:pointer;box-shadow:0 4px 10px rgba(0,102,255,0.14)}
         button[disabled]{opacity:.5;cursor:default}
         .result{max-width:720px;background:white;padding:14px 16px;border-radius:10px;box-shadow:0 6px 20px rgba(0,0,0,0.06);text-align:left}
-        .title{font-weight:700;margin-bottom:6px}
-        .small{font-size:13px;color:#555}
+        .title{font-size:30px;font-weight:700;margin-bottom:6px}
+        .small{font-size:20px;color:#555}
         .file{font-size:13px;color:#444}
         input[type=file]{display:none}
         .info{font-size:13px;color:#666}
@@ -25,17 +25,15 @@
 <body>
     <div class="wrap">
         <div class="wheel-container" aria-hidden="true">
-            <div class="pointer" title="Result pointer"></div>
+            <div class="pointer" title="Result pointer" style="transform: translateX(-50%) rotate(180deg);"></div>
             <canvas id="wheel" width="520" height="520"></canvas>
         </div>
 
         <div class="controls">
             <label class="file">
                 <input id="fileInput" type="file" accept="application/json">
-                <button id="loadBtn" type="button">Load JSON file</button>
             </label>
             <button id="spinBtn" type="button">Spin</button>
-            <button id="randomizeBtn" type="button">Random list</button>
         </div>
 
         <div class="result" id="result" aria-live="polite">
@@ -65,14 +63,11 @@
                 }
             }
         }
-
         // Add Wheel asset
         const canvas = document.getElementById('wheel');
         const ctx = canvas.getContext('2d');
         const spinBtn = document.getElementById('spinBtn');
-        const loadBtn = document.getElementById('loadBtn');
         const fileInput = document.getElementById('fileInput');
-        const randomizeBtn = document.getElementById('randomizeBtn');
         const resTitle = document.getElementById('resTitle');
         const resText = document.getElementById('resText');
 
@@ -128,12 +123,40 @@
                 entities = Array.from({ length: 8 }, (_, i) => ({ title: 'Item ' + (i + 1), text: '' }));
             }
             drawWheel();
-            setResult('Sample list loaded', 'Using a generated sample list with ' + entities.length + ' items.');
+            const title = (Array.isArray(entities) && entities[0] && entities[0].FactDesc) ? entities[0].FactDesc : 'Sample list loaded';
+            setResult(title, 'Using a generated sample list with ' + entities.length + ' items.');
         }
 
-        function setResult(title, text) {
+        function setResult(FactDescOrTitle, text) {
+            let title = FactDescOrTitle || '';
+            // Prefer JSON key FactDesc / FactDes when available for the entity that matches the provided title.
+            if (Array.isArray(entities) && entities.length > 0) {
+                if (typeof FactDescOrTitle === 'string') {
+                    // Try to find an entity by exact title match
+                    let idx = entities.findIndex(e => e && e.title === FactDescOrTitle);
+
+                    // If not found, handle "Item N" fallback labels produced elsewhere
+                    if (idx === -1) {
+                        const m = FactDescOrTitle.match(/^Item\s+(\d+)$/);
+                        if (m) {
+                            const i = parseInt(m[1], 10) - 1;
+                            if (i >= 0 && i < entities.length) idx = i;
+                        }
+                    }
+
+                    if (idx !== -1) {
+                        const ent = entities[idx];
+                        title = ent.FactDesc || ent.FactDesc || ent.title || title;
+                        text = ent.text || text || '';
+                    }
+                } else if (typeof FactDescOrTitle === 'object' && FactDescOrTitle) {
+                    title = FactDescOrTitle.FactDesc || FactDescOrTitle.FactDesc || FactDescOrTitle.title || title;
+                    text = FactDescOrTitle.text || text || '';
+                }
+            }
+
             resTitle.textContent = title;
-            resText.textContent = text;
+            resText.textContent = text || '';
         }
 
         function drawWheel() {
@@ -207,8 +230,6 @@
             if (isSpinning || entities.length === 0) return;
             isSpinning = true;
             spinBtn.disabled = true;
-            loadBtn.disabled = true;
-            randomizeBtn.disabled = true;
 
             const n = entities.length;
             const sliceDeg = 360 / n;
@@ -232,8 +253,6 @@
                 canvas.style.transform = `rotate(${currentRotation}deg)`;
                 isSpinning = false;
                 spinBtn.disabled = false;
-                loadBtn.disabled = false;
-                randomizeBtn.disabled = false;
                 const selected = entities[targetIndex];
                 setResult(selected.title || ('Item ' + (targetIndex+1)), selected.text || '');
             }
@@ -243,11 +262,47 @@
 
         // UI access
         spinBtn.addEventListener('click', spin);
-        randomizeBtn.addEventListener('click', sampleEntities);
-        loadBtn.addEventListener('click', ()=>fileInput.click());
         fileInput.addEventListener('change', e => {
             const f = e.target.files && e.target.files[0];
-            if (f) loadFromFile(f);
+            if (f) {
+                loadFromFile(f);
+
+                // After a spin completes, prefer the "FactDes" key for the result title (but keep "title" for the wheel).
+                // We attach a one-time transitionend listener that runs after the spin's handler and overrides the result if needed.
+                const preferFactDes = () => {
+                    // Defer so spin's own transitionend handler runs first and updates currentRotation/isSpinning.
+                    setTimeout(() => {
+                        if (isSpinning) return;
+                        if (!Array.isArray(entities) || entities.length === 0) return;
+
+                        const n = entities.length;
+                        const sliceDeg = 360 / n;
+                        let best = 0;
+                        let bestDiff = Infinity;
+
+                        // Find which slice center is closest to the pointer at 270deg given currentRotation
+                        for (let i = 0; i < n; i++) {
+                            const center = (i * sliceDeg) + sliceDeg / 2;
+                            const pos = (center + currentRotation) % 360;
+                            let diff = Math.abs(pos - 270);
+                            if (diff > 180) diff = 360 - diff;
+                            if (diff < bestDiff) {
+                                bestDiff = diff;
+                                best = i;
+                            }
+                        }
+
+                        const selected = entities[best];
+                        if (selected && selected.FactDes) {
+                            setResult(selected.FactDes, selected.text || '');
+                        }
+                    }, 0);
+
+                    canvas.removeEventListener('transitionend', preferFactDes);
+                };
+
+                canvas.addEventListener('transitionend', preferFactDes);
+            }
             fileInput.value = '';
         });
 
@@ -258,7 +313,7 @@
                 factData = data;
                 entities = factData.slice();
                 drawWheel();
-                setResult('Ready', 'Loaded ./FactFiles/MathFacts.json (' + entities.length + ' items).');
+                setResult('Ready to spin!', ' ' + entities.length + ' facts loaded.');
                 // also expose for debugging
                 window.jsonData = factData;
                 return;

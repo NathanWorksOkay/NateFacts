@@ -1,10 +1,10 @@
 [
-                { "title": "Fact #1", "text": "Arabic numerals (0-9) originated in India between the 1st and 6th centuries AD. Europe only adopted them in the 10th century!" },
-                { "title": "Fact #2", "text": "Fact 2" },
-                { "title": "Fact #3", "text": "Fact 3" },
-                { "title": "Fact #4", "text": "Fact 4" },
-                { "title": "Fact #5", "text": "Fact 5" },
-                { "title": "Fact #6", "text": "Fact 6" },
-                { "title": "Fact #7", "text": "Fact 7" },
-                { "title": "Fact #8", "text": "Fact 8" }
+                { "title": "Fact #1", "FactDesc": "The origin of numbers","text": "Arabic numerals (0-9) originated in India between the 1st and 6th centuries AD. Europe only adopted them in the 10th century!" },
+                { "title": "Fact #2", "FactDesc": "The longest equation","text": "The longest mathematical proof ever generated and calculated is for the \"Boolean Pythagorean Triples\" problem. Which was proven in 2016 and consists of over 200 terabytes of data." },
+                { "title": "Fact #3", "FactDesc": "The origins of zero","text": "The concept of zero as a number was developed by Indian mathematicians around the 5th century AD." },
+                { "title": "Fact #4", "FactDesc": "The Fibonacci sequence","text": "The Fibonacci sequence, a series of numbers where each number is the sum of the two preceding ones, was introduced to the Western world by Leonardo of Pisa (Fibonacci) in his 1202 book 'Liber Abaci'." },
+                { "title": "Fact #5", "FactDesc": "Probability of Enrichment","text": "If you start out with one dollar, you are only 30 hands of blackjack away from being a billionaire." },
+                { "title": "Fact #6", "FactDesc": "Mathematical proof formalization","text": "The concept of mathematical proof was formalized by the ancient Greeks, particularly in the work of Euclid and Archimedes." },
+                { "title": "Fact #7", "FactDesc": "In a Jiffy!","text": "A \"jiffy\" is an actual unit of time, defined as 1/100th of a second." },
+                { "title": "Fact #8", "FactDesc": "Alphabetical Numbers","text": "The number forty is the only number that is spelled with the letters in alphabetical order!" }
             ]
